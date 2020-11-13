@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      
+ 
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
@@ -21,6 +21,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade ckanapi pandas
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Turnstyle
+      uses: softprops/turnstyle@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Run ETL script
       run: python etl.py
