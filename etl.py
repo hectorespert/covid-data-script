@@ -1,16 +1,40 @@
 from ckanapi import RemoteCKAN
-
-print("Starting")
+from json import dumps
+from pandas import read_json
 
 covid_data = []
 
 with RemoteCKAN('https://dadesobertes.gva.es') as gva:
     package = gva.action.package_show(id='15810be9-d797-4bf3-b37c-4c922bee8ef8')
-    print(package['num_resources'])
-    #for resource in sorted(package['resources'], key=lambda item: item['position']):
-        #print(resource)
-        #covid_data.append({'created': resource['created'], 'last_modified': resource['last_modified']})
-        #data = gva.action.datastore_search(id=resource['id'])
-        #rint(data)
+    for resource in package['resources']:
+        created_date = resource['created']
+        last_modified_date = resource['last_modified']
+        data_date = resource['name'][-10:]
+        data = gva.action.datastore_search(id=resource['id'])
+        for record in data['records']:
 
-print(covid_data)
+            if 'Municipi / Municipio' in record:
+                town = record['Municipi / Municipio']
+            elif 'Municipio' in record:
+                town = record['Municipio']
+            else:
+                town = record['Municipi']
+
+            if 'Casos PCR+ / Casos PCR+' in record:
+                pcr_cases = record['Casos PCR+ / Casos PCR+']
+            else:
+                pcr_cases = record['Casos PCR+']
+
+            covid_data.append({
+                'Fecha y hora creación': created_date, 
+                'Fecha y hora última modificación': last_modified_date,
+                'Fecha datos': data_date,
+                'Municipio': town,
+                'Casos PCR+': pcr_cases
+            })
+
+with open('generated/historico_covid_19_municipios_comunidad_valenciana.json', 'w', encoding='utf-8') as file:
+    json_string = dumps(covid_data, default=lambda o: o.__dict__, sort_keys=True, indent=2, ensure_ascii=False)
+    file.write(json_string)
+
+read_json('generated/historico_covid_19_municipios_comunidad_valenciana.json').to_csv ('generated/historico_covid_19_municipios_comunidad_valenciana.csv', index = None)
