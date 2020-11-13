@@ -12,6 +12,7 @@ with RemoteCKAN('https://dadesobertes.gva.es') as gva:
         data_date = resource['name'][-10:]
         data = gva.action.datastore_search(id=resource['id'])
         for record in data['records']:
+            print(record)
 
             if 'Municipi / Municipio' in record:
                 town = record['Municipi / Municipio']
