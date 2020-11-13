@@ -33,8 +33,10 @@ with RemoteCKAN('https://dadesobertes.gva.es') as gva:
                 'Casos PCR+': pcr_cases
             })
 
-with open('generated/historico_covid_19_municipios_comunidad_valenciana.json', 'w', encoding='utf-8') as file:
+print("Generating json file on dist/historico_covid_19_municipios_comunidad_valenciana.json")
+with open('dist/historico_covid_19_municipios_comunidad_valenciana.json', 'w', encoding='utf-8') as file:
     json_string = dumps(covid_data, default=lambda o: o.__dict__, sort_keys=True, indent=2, ensure_ascii=False)
     file.write(json_string)
 
-read_json('generated/historico_covid_19_municipios_comunidad_valenciana.json').to_csv ('generated/historico_covid_19_municipios_comunidad_valenciana.csv', index = None)
+print("Generating csv file on dist/historico_covid_19_municipios_comunidad_valenciana.csv")
+read_json('dist/historico_covid_19_municipios_comunidad_valenciana.json').to_csv ('dist/historico_covid_19_municipios_comunidad_valenciana.csv', index = None)
