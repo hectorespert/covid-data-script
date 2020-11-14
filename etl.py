@@ -1,6 +1,6 @@
 from ckanapi import RemoteCKAN
 from json import dumps
-from pandas import read_json
+from pandas import read_json, read_csv
 from os import path, makedirs
 
 covid_data = []
@@ -11,17 +11,17 @@ with RemoteCKAN('https://dadesobertes.gva.es') as gva:
         created_date = resource['created']
         last_modified_date = resource['last_modified']
         data_date = resource['name'][-10:]
-        data = gva.action.datastore_search(id=resource['id'])
-        for record in data['records']:
-
-            if 'Municipi / Municipio' in record:
+        data = read_csv(resource['url'], sep=';')
+        for _, record in data.iterrows():
+            print(record.keys())
+            if 'Municipi / Municipio' in record.keys():
                 town = record['Municipi / Municipio']
-            elif 'Municipio' in record:
+            elif 'Municipio' in record.keys():
                 town = record['Municipio']
             else:
                 town = record['Municipi']
 
-            if 'Casos PCR+ / Casos PCR+' in record:
+            if 'Casos PCR+ / Casos PCR+' in record.keys():
                 pcr_cases = record['Casos PCR+ / Casos PCR+']
             else:
                 pcr_cases = record['Casos PCR+']
@@ -33,6 +33,7 @@ with RemoteCKAN('https://dadesobertes.gva.es') as gva:
                 'Municipio': town,
                 'Casos PCR+': pcr_cases
             })
+        break
 
 if not path.exists('dist'):
     makedirs('dist')
