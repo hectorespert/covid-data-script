@@ -44,3 +44,13 @@ jobs:
         build_dir: dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload CSV to Spreadsheet
+      if: success()
+      uses: canonical-web-and-design/csv-to-google-spreadsheet
+      with:
+        csv_path: dist/historico_covid_19_municipios_comunidad_valenciana.csv
+        spreadsheet_id: ${{ secrets.google_spreadsheet_id }}
+        worksheet: 0
+        google_service_account_email: ${{ secrets.google_service_account_email }}
+        google_service_account_private_key: ${{ secrets.google_service_account_private_key }}
