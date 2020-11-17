@@ -1,7 +1,10 @@
+from csv import QUOTE_ALL
+from io import StringIO
 from ckanapi import RemoteCKAN
 from json import dumps
 from pandas import read_json, read_csv
 from os import path, makedirs
+from requests import get
 
 covid_data = []
 
@@ -11,9 +14,14 @@ with RemoteCKAN('https://dadesobertes.gva.es') as gva:
         created_date = resource['created']
         last_modified_date = resource['last_modified']
         data_date = resource['name'][-10:]
-        data = read_csv(resource['url'], sep=';')
+        raw_csv = get(resource['url']).text
+
+        if '"CodMunicipio"' in raw_csv:
+            data = read_csv(StringIO(raw_csv), sep=',', quoting=QUOTE_ALL)
+        else:
+            data = read_csv(StringIO(raw_csv), sep=';')
+
         for _, record in data.iterrows():
-            print(record.keys())
             if 'Municipi / Municipio' in record.keys():
                 town = record['Municipi / Municipio']
             elif 'Municipio' in record.keys():
@@ -33,7 +41,6 @@ with RemoteCKAN('https://dadesobertes.gva.es') as gva:
                 'Municipio': town,
                 'Casos PCR+': pcr_cases
             })
-        break
 
 if not path.exists('dist'):
     makedirs('dist')
