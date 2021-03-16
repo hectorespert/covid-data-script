@@ -4,9 +4,17 @@ from ckanapi import RemoteCKAN
 from json import dumps
 from pandas import read_json, read_csv
 from os import path, makedirs
-from requests import get
+from requests import Session
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
 covid_data = []
+
+retry_strategy = Retry(backoff_factor=2)
+adapter = HTTPAdapter(max_retries=retry_strategy)
+
+http = Session()
+http.mount("https://", adapter)
 
 with RemoteCKAN('https://dadesobertes.gva.es') as gva:
     package = gva.action.package_show(id='15810be9-d797-4bf3-b37c-4c922bee8ef8')
@@ -14,7 +22,7 @@ with RemoteCKAN('https://dadesobertes.gva.es') as gva:
         created_date = resource['created']
         last_modified_date = resource['last_modified']
         data_date = resource['name'][-10:]
-        raw_csv = get(resource['url']).text
+        raw_csv = http.get(resource['url']).text
 
         if '"CodMunicipio"' in raw_csv:
             data = read_csv(StringIO(raw_csv), sep=',', quoting=QUOTE_ALL)

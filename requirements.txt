@@ -1,2 +1,4 @@
 ckanapi
 pandas
+requests
+urllib3
