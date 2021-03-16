@@ -22,7 +22,8 @@ with RemoteCKAN('https://dadesobertes.gva.es') as gva:
         created_date = resource['created']
         last_modified_date = resource['last_modified']
         data_date = resource['name'][-10:]
-        raw_csv = http.get(resource['url']).text
+        response = http.get(resource['url'])
+        raw_csv = response.content.decode('utf-8', 'ignore')
 
         if '"CodMunicipio"' in raw_csv:
             data = read_csv(StringIO(raw_csv), sep=',', quoting=QUOTE_ALL)
